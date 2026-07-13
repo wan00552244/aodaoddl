@@ -1,274 +1,226 @@
-import { useState, useEffect } from 'react';
-import { X, BookOpen, Skull, Sword, ChevronRight } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상세 기획 - 검은 검사 가츠 아카이브</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;900&family=Noto+Sans+KR:wght@400;700;900&display=swap');
+        
+        body {
+            margin: 0; padding: 0;
+            background-color: #050507; color: #b2b2ba;
+            font-family: 'Noto Sans KR', sans-serif;
+            display: flex; justify-content: center; align-items: flex-start;
+            min-height: 100vh;
+        }
 
-type Chapter = {
-  id: number;
-  num: string;
-  title: string;
-  subtitle: string;
-  desc: string;
-  overview: string;
-  img: string;
-  icon: typeof BookOpen;
-};
+        .browser-mockup {
+            width: 100%; max-width: 850px;
+            background-color: #09090c;
+            position: relative; box-sizing: border-box;
+            border: 1px solid #1f1f2e; margin: 40px 0;
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.95);
+        }
 
-const chapters: Chapter[] = [
-  {
-    id: 1,
-    num: 'CH.01',
-    title: '황금시대',
-    subtitle: '(Golden Age)',
-    desc: '매의 단에서의 행복했던 나날과 동료애, 그리고 파멸의 전조.',
-    overview:
-      '고독한 용병 가츠가 그리피스의 "매의 단"의 돌격대장으로서 백년전쟁을 종식시키는 영웅이 되기까지의 청춘기입니다. 생애 처음으로 소중한 전우들과 캐스커라는 정인을 만나며 인간적인 행복을 찾아가는 가장 아름답고 비극적인 전초전입니다.',
-    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRexsrSTpx2EBbBFta6UC4V1CsbWpqIUZw1vYFa1_M7Q&s=10',
-    icon: BookOpen,
-  },
-  {
-    id: 2,
-    num: 'CH.02',
-    title: '강마의 의식',
-    subtitle: '(Eclipse)',
-    desc: '동료들을 제물로 바친 그리피스의 영혼의 배신과 처절한 지옥.',
-    overview:
-      '절망에 사로잡힌 그리피스가 진홍의 베헤리트를 매개로 고드 핸드를 소환하는 대재앙의 순간입니다. 매의 단 전원이 마물들의 산 제물이 되어 살육당하고 가츠는 낙인이 새겨진 채 복수귀로 태어나게 되는 결정적 분기점입니다.',
-    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyTowZmY6UOonev0ZnVjLqd4RqPBMGBrpbwUG7_jmeLg&s=10',
-    icon: Skull,
-  },
-  {
-    id: 3,
-    num: 'CH.03',
-    title: '검은 검사',
-    subtitle: '(Black Swordsman)',
-    desc: "철괴 '드래곤 슬레이어'를 고쳐 쥐고 인과율에 항거하는 밤.",
-    overview:
-      "지옥에서 살아 돌아온 가츠는 대검 '드래곤 슬레이어'와 의수 대포를 들고 가로막는 모든 괴물들을 난도질하며, 고드 핸드가 된 페무토(그리피스)의 목을 치기 위해 여정을 떠나는 장엄한 전투기입니다.",
-    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ985-i5wrE24KxsUPp1Dh00PBCSGrC3Nj9sBSYDt0iNg&s=10',
-    icon: Sword,
-  },
-];
+        /* 좌우 메탈 외곽 프레임 장식 */
+        .browser-mockup::before {
+            content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 35px;
+            background: linear-gradient(90deg, #0d0d12 0%, #1a1a24 50%, #08080c 100%);
+            border-right: 2px solid #030305; z-index: 5; pointer-events: none;
+        }
+        .browser-mockup::after {
+            content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 35px;
+            background: linear-gradient(270deg, #0d0d12 0%, #1a1a24 50%, #08080c 100%);
+            border-left: 2px solid #030305; z-index: 5; pointer-events: none;
+        }
 
-const navLeft = ['가임', '보스팅', '페그립'];
-const navRight = ['이틀어', '작정', '검검사'];
+        .main-wrapper { padding: 0 35px; position: relative; z-index: 2; }
 
-function App() {
-  const [activeChapter, setActiveChapter] = useState<Chapter | null>(null);
-  const [scrolled, setScrolled] = useState(false);
+        /* 상단 바 */
+        .top-nav {
+            background: linear-gradient(180deg, #2a2a35 0%, #14141a 40%, #07070a 100%);
+            border-bottom: 2px solid #030305;
+            display: flex; justify-content: center; align-items: center; padding: 16px 10px;
+        }
+        .nav-menu { display: flex; align-items: center; gap: 22px; list-style: none; margin: 0; padding: 0; }
+        .nav-menu li a { color: #6e6e7a; text-decoration: none; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; }
+        .nav-menu li a.active, .nav-menu li a:hover { color: #e60000; text-shadow: 0 0 8px rgba(230, 0, 0, 0.5); }
+        .brand-emblem { font-family: 'Cinzel', serif; font-size: 1.6rem; font-weight: 900; color: #e60000; margin: 0 20px; text-shadow: 0 0 12px rgba(230, 0, 0, 0.8); }
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+        /* 히어로 대문 섹션 */
+        .hero-section { text-align: center; padding: 50px 10px 30px 10px; background: radial-gradient(circle at center, #221414 0%, #09090c 70%); }
+        .hero-title { font-family: 'Cinzel', serif; font-size: 3.5rem; font-weight: 900; color: #888894; margin: 0 0 25px 0; letter-spacing: 3px; }
+        .art-frame { max-width: 440px; margin: 0 auto; border: 2px solid #1f1f2a; border-radius: 4px; overflow: hidden; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.95); }
+        .art-frame img { width: 100%; display: block; }
+        .hero-headline { font-size: 2.3rem; font-weight: 900; color: #d1d1d6; margin: 40px 0 20px 0; text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.9); }
+        .section-divider { height: 1px; background: linear-gradient(90deg, transparent, #e60000, transparent); margin: 40px 20px; opacity: 0.5; }
 
-  useEffect(() => {
-    if (activeChapter) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-  }, [activeChapter]);
+        /* 3단 카드 레이아웃 */
+        .content-container { padding: 10px 15px 30px 15px; }
+        .cards-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .stone-card {
+            background: linear-gradient(135deg, #181822 0%, #0a0a0e 100%);
+            border: 1px solid #282836; border-radius: 6px; padding: 18px 12px; text-align: center; cursor: pointer;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8), 0 12px 25px rgba(0, 0, 0, 0.6);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .stone-card:hover { transform: translateY(-8px); border-color: #b81d1d; box-shadow: 0 15px 30px rgba(184, 29, 29, 0.3); }
+        .card-top-title { font-size: 0.95rem; color: #90909a; margin: 0 0 12px 0; font-weight: 700; }
+        
+        .card-pic-box {
+            width: 100%; height: 140px; background-color: #000; margin-bottom: 14px;
+            border-radius: 4px; border: 1px solid #22222e; background-size: cover; background-position: center top;
+        }
 
-  return (
-    <div className="min-h-screen bg-ink-950 flex justify-center items-start">
-      {/* Browser mockup frame */}
-      <div className="w-full max-w-[850px] bg-ink-900 relative border border-ink-500 my-6 md:my-10 shadow-[0_30px_100px_rgba(0,0,0,0.95)]">
-        {/* Left metal frame */}
-        <div
-          className="absolute top-0 left-0 bottom-0 w-[35px] bg-gradient-to-r from-ink-800 via-ink-600 to-ink-900 border-r-2 border-ink-950 z-20 pointer-events-none hidden sm:block"
-        />
-        {/* Right metal frame */}
-        <div
-          className="absolute top-0 right-0 bottom-0 w-[35px] bg-gradient-to-l from-ink-800 via-ink-600 to-ink-900 border-l-2 border-ink-950 z-20 pointer-events-none hidden sm:block"
-        />
+        /* ★ [카드 이미지 주소 설정 완료] */
+        .pic-1 { 
+            background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRexsrSTpx2EBbBFta6UC4V1CsbWpqIUZw1vYFa1_M7Q&s=10'); /* ★ CH.01 황금시대 이미지 주소 */
+        } 
+        .pic-2 { 
+            background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyTowZmY6UOonev0ZnVjLqd4RqPBMGBrpbwUG7_jmeLg&s=10'); /* ★ CH.02 강마의 의식 이미지 주소 */
+        }        
+        .pic-3 { 
+            background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ985-i5wrE24KxsUPp1Dh00PBCSGrC3Nj9sBSYDt0iNg&s=10'); /* ★ CH.03 검은 검사 이미지 주소 */
+        }      
 
-        <div className="px-0 sm:px-[35px] relative z-10">
-          {/* Top nav */}
-          <nav
-            className={`sticky top-0 z-30 transition-all duration-300 ${
-              scrolled
-                ? 'bg-ink-900/95 backdrop-blur-md shadow-lg'
-                : 'bg-gradient-to-b from-ink-300/40 via-ink-700 to-ink-900'
-            } border-b-2 border-ink-950`}
-          >
-            <div className="flex justify-center items-center py-4 px-2">
-              <ul className="flex items-center gap-5 list-none m-0 p-0">
-                {navLeft.map((item) => (
-                  <li key={item}>
-                    <a
-                      href="#"
-                      className="text-ash-500 hover:text-blood-500 text-xs font-bold tracking-wider transition-colors duration-200 hover:[text-shadow:0_0_8px_rgba(230,0,0,0.5)]"
-                    >
-                      {item}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-              <div className="font-cinzel text-2xl font-black text-blood-500 mx-5 [text-shadow:0_0_12px_rgba(230,0,0,0.8)] animate-pulse-glow">
-                BERSERK
-              </div>
-              <ul className="flex items-center gap-5 list-none m-0 p-0">
-                {navRight.map((item) => (
-                  <li key={item}>
-                    <a
-                      href="#"
-                      className="text-ash-500 hover:text-blood-500 text-xs font-bold tracking-wider transition-colors duration-200 hover:[text-shadow:0_0_8px_rgba(230,0,0,0.5)]"
-                    >
-                      {item}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </nav>
+        .card-main-title { font-size: 1.1rem; color: #ffffff; font-weight: 700; margin-bottom: 2px; }
+        .card-subtitle-eng { font-size: 0.75rem; color: #636375; margin-bottom: 12px; font-weight: 700; }
+        .stone-card p { font-size: 0.8rem; color: #858590; line-height: 1.6; margin: 0 0 18px 0; min-height: 58px; word-break: keep-all; }
+        .story-trigger { color: #ff3b30; font-size: 0.85rem; font-weight: 700; text-decoration: underline; }
 
-          {/* Hero section */}
-          <section className="text-center pt-12 pb-8 px-3 bg-[radial-gradient(circle_at_center,#221414_0%,#09090c_70%)]">
-            <h1
-              className="font-cinzel text-5xl md:text-6xl font-black text-ash-300 m-0 mb-6 tracking-[3px] opacity-0 animate-fade-up"
-              style={{ animationDelay: '0.1s' }}
-            >
-              GUTS
-            </h1>
-            <div className="max-w-[440px] mx-auto border-2 border-ink-500 rounded overflow-hidden shadow-[0_20px_45px_rgba(0,0,0,0.95)] opacity-0 animate-scale-in" style={{ animationDelay: '0.3s' }}>
-              <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcaDr22ZigF_TNRaa9j9hG6fZ0Hbt4etQEvYrtFyr1Jg&s=10"
-                alt="가츠 메인 비주얼"
-                className="w-full block"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600';
-                }}
-              />
-            </div>
-            <div
-              className="text-3xl md:text-4xl font-black text-ash-100 mt-10 mb-5 [text-shadow:3px_3px_8px_rgba(0,0,0,0.9)] opacity-0 animate-fade-up"
-              style={{ animationDelay: '0.5s' }}
-            >
-              "도망친 곳엔 낙원은 없어"
-            </div>
-          </section>
+        /* 하단 상세 정보 섹션 */
+        .chronicle-section { background: linear-gradient(180deg, #09090c 0%, #050507 100%); padding: 40px 25px 60px 25px; border-top: 1px dashed #222230; }
+        .chronicle-title { text-align: center; font-size: 1.8rem; font-weight: 900; color: #e60000; margin-bottom: 35px; text-shadow: 0 0 10px rgba(230,0,0,0.3); }
+        .chronicle-wrapper { display: flex; gap: 30px; align-items: center; }
+        .chronicle-thumb { flex: 1; max-width: 300px; border: 1px solid #2d2d3d; box-shadow: 0 15px 35px rgba(0,0,0,0.8); border-radius: 4px; }
+        .chronicle-desc { flex: 1.2; }
+        .chronicle-desc h3 { font-size: 1.4rem; color: #ffffff; margin-top: 0; margin-bottom: 15px; border-left: 4px solid #e60000; padding-left: 12px; font-weight: 900; }
+        .chronicle-desc p { font-size: 0.9rem; color: #9898a3; line-height: 1.8; margin: 0; word-break: keep-all; }
 
-          {/* Divider */}
-          <div className="h-px bg-gradient-to-r from-transparent via-blood-500 to-transparent mx-5 my-10 opacity-50" />
+        /* 기능 팝업창 */
+        .right-bottom-modal {
+            display: none; position: absolute; bottom: 80px; right: 45px; width: 240px;
+            background: #101014; border: 2px solid #444454; border-radius: 4px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9); z-index: 99;
+        }
+        .modal-head { background-color: #181822; padding: 10px 14px; border-bottom: 1px solid #282836; display: flex; justify-content: space-between; align-items: center; }
+        .modal-head h4 { margin: 0; font-size: 0.85rem; color: #d1d1d6; }
+        .modal-close-icon { color: #888; cursor: pointer; font-size: 1.1rem; }
+        .modal-close-icon:hover { color: #ff3b30; }
+        .modal-main-text { padding: 14px; font-size: 0.82rem; line-height: 1.6; color: #94949e; white-space: pre-line; }
+        .footer-credit { text-align: center; padding: 25px 10px; font-size: 0.75rem; color: #40404a; background-color: #030305; border-top: 1px solid #14141a; }
+    </style>
+</head>
+<body>
 
-          {/* Cards */}
-          <main className="px-4 pb-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {chapters.map((ch, i) => {
-                const Icon = ch.icon;
-                return (
-                  <div
-                    key={ch.id}
-                    onClick={() => setActiveChapter(ch)}
-                    className="group bg-gradient-to-br from-ink-600 to-ink-800 border border-ink-400 rounded-md p-5 text-center cursor-pointer shadow-[inset_0_0_15px_rgba(0,0,0,0.8),0_12px_25px_rgba(0,0,0,0.6)] transition-all duration-300 hover:-translate-y-2 hover:border-blood-600 hover:shadow-card-hover opacity-0 animate-fade-up"
-                    style={{ animationDelay: `${0.6 + i * 0.1}s` }}
-                  >
-                    <div className="flex items-center justify-center gap-2 mb-3">
-                      <Icon className="w-4 h-4 text-ash-500 group-hover:text-blood-500 transition-colors duration-300" />
-                      <span className="text-sm text-ash-400 font-bold">{ch.num}</span>
+    <div class="browser-mockup">
+        <div class="main-wrapper">
+            
+            <nav class="top-nav">
+                <ul class="nav-menu">
+                    <li><a href="#" class="active">가임</a></li>
+                    <li><a href="#">보스팅</a></li>
+                    <li><a href="#">페그립</a></li>
+                </ul>
+                <div class="brand-emblem">BERSERK</div>
+                <ul class="nav-menu">
+                    <li><a href="#">이틸어</a></li>
+                    <li><a href="#">작정</a></li>
+                    <li><a href="#">검검사</a></li>
+                </ul>
+            </nav>
+
+            <section class="hero-section">
+                <h1 class="hero-title">GUTS</h1>
+                <div class="art-frame">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcaDr22ZigF_TNRaa9j9hG6fZ0Hbt4etQEvYrtFyr1Jg&s=10" alt="가츠 메인 비주얼" id="coverArt">
+                </div>
+                <div class="hero-headline">“도망친 곳엔 낙원은 없어”</div>
+            </section>
+
+            <div class="section-divider"></div>
+
+            <main class="content-container">
+                <div class="cards-layout">
+                    
+                    <div class="stone-card" onclick="openStoryPane(1)">
+                        <div class="card-top-title">CH.01</div>
+                        <div class="card-pic-box pic-1"></div> <div class="card-main-title">황금시대</div>
+                        <div class="card-subtitle-eng">(Golden Age)</div>
+                        <p>매의 단에서의 행복했던 나날과 동료애, 그리고 파멸의 전조.</p>
+                        <div class="story-trigger">줄거리 보기</div>
                     </div>
-                    <div
-                      className="w-full h-[140px] bg-ink-950 mb-4 rounded border border-ink-400 bg-cover bg-top"
-                      style={{ backgroundImage: `url('${ch.img}')` }}
-                    />
-                    <div className="text-lg text-white font-bold">{ch.title}</div>
-                    <div className="text-xs text-ash-600 mb-3 font-bold">{ch.subtitle}</div>
-                    <p className="text-sm text-ash-400 leading-relaxed m-0 mb-4 min-h-[58px] break-keep">
-                      {ch.desc}
-                    </p>
-                    <div className="flex items-center justify-center gap-1 text-blood-400 text-sm font-bold group-hover:gap-2 transition-all duration-300">
-                      줄거리 보기
-                      <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+
+                    <div class="stone-card" onclick="openStoryPane(2)">
+                        <div class="card-top-title">CH.02</div>
+                        <div class="card-pic-box pic-2"></div> <div class="card-main-title">강마의 의식</div>
+                        <div class="card-subtitle-eng">(Eclipse)</div>
+                        <p>동료들을 제물로 바친 그리피스의 영혼의 배신과 처절한 지옥.</p>
+                        <div class="story-trigger">줄거리 보기</div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          </main>
 
-          {/* Chronicle section */}
-          <section className="bg-gradient-to-b from-ink-900 to-ink-950 pt-10 pb-16 px-6 border-t border-dashed border-ink-400">
-            <h2 className="text-center text-3xl font-black text-blood-500 mb-9 [text-shadow:0_0_10px_rgba(230,0,0,0.3)]">
-              인과율의 거대한 굴레
-            </h2>
-            <div className="flex flex-col md:flex-row gap-8 items-center">
-              <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTFr68iCK7aEknfwi5AedG8voT3FRt6qB95lITZGNOLbA&s=10"
-                alt="인과율 스토리 그래픽"
-                className="flex-1 max-w-[300px] w-full border border-ink-300 shadow-[0_15px_35px_rgba(0,0,0,0.8)] rounded"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=400';
-                }}
-              />
-              <div className="flex-[1.2]">
-                <h3 className="text-2xl text-white mt-0 mb-4 border-l-4 border-blood-500 pl-3 font-black">
-                  왜 가츠는 이렇게 되었는가?
-                </h3>
-                <p className="text-sm text-ash-300 leading-loose m-0 break-keep">
-                  시체 밑에서 태어나 전장에서 자라난 가츠에게 세상은 오직 투쟁뿐이었습니다. 그리피스를
-                  만나 '매의 단'에서 처음으로 삶의 온기를 느꼈으나, 대등한 친구가 되고 싶다는 열망에
-                  용병단을 잠시 떠나게 됩니다.
-                  <br />
-                  <br />
-                  하지만 가츠의 부재 속에서 무너진 그리피스는 자신의 야망을 재건하기 위해 '일식'을
-                  발동하고, 가츠의 목숨보다 소중했던 동료 전체를 마물의 제물로 바칩니다. 연인의 파멸과
-                  동료들의 처참한 죽음을 강제로 목격하며 한쪽 눈과 한쪽 팔을 잃은 가츠. 그는 슬퍼할
-                  시간조차 빼앗긴 채, 밤마다 몰려드는 영혼들의 습격 속에서 오직 배신자를 향한 처절한
-                  분노와 복수심 하나로 인간의 한계를 넘은 귀신, '검은 검사'로 살아가게 된 것입니다.
-                </p>
-              </div>
-            </div>
-          </section>
+                    <div class="stone-card" onclick="openStoryPane(3)">
+                        <div class="card-top-title">CH.03</div>
+                        <div class="card-pic-box pic-3"></div> <div class="card-main-title">검은 검사</div>
+                        <div class="card-subtitle-eng">(Black Swordsman)</div>
+                        <p>철괴 '드래곤 슬레이어'를 고쳐 쥐고 인과율에 항거하는 밤.</p>
+                        <div class="story-trigger">줄거리 보기</div>
+                    </div>
 
-          {/* Footer */}
-          <footer className="text-center py-6 px-3 text-xs text-ash-500/60 bg-ink-950 border-t border-ink-700">
-            <p>Copyright © 2026 Berserkis LLC. All rights reserved.</p>
-          </footer>
+                </div>
+            </main>
+
+            <section class="chronicle-section">
+                <h2 class="chronicle-title">인과율의 거대한 굴레</h2>
+                <div class="chronicle-wrapper">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTFr68iCK7aEknfwi5AedG8voT3FRt6qB95lITZGNOLbA&s=10" alt="인과율 스토리 그래픽" class="chronicle-thumb" id="subArt">
+                    <div class="chronicle-desc">
+                        <h3>왜 가츠는 이렇게 되었는가?</h3>
+                        <p>
+                            시체 밑에서 태어나 전장에서 자라난 가츠에게 세상은 오직 투쟁뿐이었습니다. 그리피스를 만나 '매의 단'에서 처음으로 삶의 온기를 느꼈으나, 대등한 친구가 되고 싶다는 열망에 용병단을 잠시 떠나게 됩니다.<br><br>
+                            하지만 가츠의 부재 속에서 무너진 그리피스는 자신의 야망을 재건하기 위해 '일식'을 발동하고, 가츠의 목숨보다 소중했던 동료 전체를 마물의 제물로 바칩니다. 연인의 파멸과 동료들의 처참한 죽음을 강제로 목격하며 한쪽 눈과 한쪽 팔을 잃은 가츠. 그는 슬퍼할 시간조차 빼앗긴 채, 밤마다 몰려드는 영혼들의 습격 속에서 오직 배신자를 향한 처절한 분노와 복수심 하나로 인간의 한계를 넘은 귀신, '검은 검사'로 살아가게 된 것입니다.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="right-bottom-modal" id="storyPane">
+                <div class="modal-head">
+                    <h4 id="paneTitle">에피소드 개요</h4>
+                    <span class="modal-close-icon" onclick="closeStoryPane()">&times;</span>
+                </div>
+                <div class="modal-main-text" id="paneContent">상세 스토리가 이곳에 출력됩니다.</div>
+            </div>
+
+            <footer class="footer-credit">
+                <p>Copyright © 2026 Berserkis LLC. All rights reserved.</p>
+            </footer>
+
         </div>
-      </div>
-
-      {/* Modal overlay */}
-      {activeChapter && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
-          onClick={() => setActiveChapter(null)}
-        >
-          <div
-            className="relative w-full max-w-md bg-ink-800 border-2 border-ink-400 rounded-md shadow-[0_15px_40px_rgba(0,0,0,0.9)] animate-scale-in"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="bg-ink-600 px-4 py-3 border-b border-ink-400 flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                {(() => {
-                  const Icon = activeChapter.icon;
-                  return <Icon className="w-4 h-4 text-blood-500" />;
-                })()}
-                <h4 className="m-0 text-sm text-ash-100 font-bold">{activeChapter.title} 개요</h4>
-              </div>
-              <button
-                onClick={() => setActiveChapter(null)}
-                className="text-ash-500 hover:text-blood-400 transition-colors duration-200"
-                aria-label="닫기"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-4">
-              <div
-                className="w-full h-32 mb-4 rounded border border-ink-400 bg-cover bg-top"
-                style={{ backgroundImage: `url('${activeChapter.img}')` }}
-              />
-              <p className="text-sm leading-relaxed text-ash-300 break-keep">
-                {activeChapter.overview}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
-  );
-}
 
-export default App;
+    <script>
+        // 사용자가 입력한 이미지 주소가 깨졌을 때 레이아웃 붕괴를 막는 예외백업 처리 기능
+        document.getElementById('coverArt').onerror = function() { this.src = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600'; };
+        document.getElementById('subArt').onerror = function() { this.src = 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=400'; };
+
+        const contents = {
+            1: { title: "황금시대 개요", text: "고독한 용병 가츠가 그리피스의 '매의 단'의 돌격대장으로서 백년전쟁을 종식시키는 영웅이 되기까지의 청춘기입니다. 생애 처음으로 소중한 전우들과 캐스커라는 정인을 만나며 인간적인 행복을 찾아가는 가장 아름답고 비극적인 전초전입니다." },
+            2: { title: "강마의 의식 개요", text: "절망에 사로잡힌 그리피스가 진홍의 베헤리트를 매개로 고드 핸드를 소환하는 대재앙의 순간입니다. 매의 단 전원이 마물들의 산 제물이 되어 살육당하고 가츠는 낙인이 새겨진 채 복수귀로 태어나게 되는 결정적 분기점입니다." },
+            3: { title: "검은 검사 개요", text: "지옥에서 살아 돌아온 가츠는 대검 '드래곤 슬레이어'와 의수 대포를 들고 가로막는 모든 괴물들을 난도질하며, 고드 핸드가 된 페무토(그리피스)의 목을 치기 위해 여정을 떠나는 장엄한 전투기입니다." }
+        };
+
+        const pane = document.getElementById('storyPane');
+        const pTitle = document.getElementById('paneTitle');
+        const pContent = document.getElementById('paneContent');
+
+        function openStoryPane(id) {
+            pTitle.innerText = contents[id].title;
+            pContent.innerText = contents[id].text;
+            pane.style.display = 'block';
+        }
+        function closeStoryPane() { pane.style.display = 'none'; }
+    </script>
+</body>
+</html>
